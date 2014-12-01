@@ -24,6 +24,7 @@ import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.BorderFactory;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
@@ -42,6 +43,7 @@ public class Main extends javax.swing.JFrame {
     private static int retards = 0;
     private static int erreurs = 0;
     private static boolean aPrendre = false;
+    private JFrame context = this;
     
     /**
      * Creates new form Main
@@ -676,6 +678,7 @@ public class Main extends javax.swing.JFrame {
                         Case caseM = cases.get(code);
                         caseM.setDescription(jTextAreaDescription.getText());
                         caseM.setMedicamentAPrendre(jCheckBoxPriseMedicaments.isSelected());
+                        jDialog1.setLocationRelativeTo(context);
                         jDialog1.setVisible(false);
                         
                         updateCases();

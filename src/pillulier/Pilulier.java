@@ -11,7 +11,7 @@ import javax.swing.JFrame;
  *
  * @author fabien
  */
-public class Pillulier {
+public class Pilulier {
 
     /**
      * @param args the command line arguments
@@ -19,6 +19,7 @@ public class Pillulier {
     public static void main(String[] args) {
         // TODO code application logic here
         JFrame mainFrame = new Main();
+        mainFrame.setLocationRelativeTo(null);
         mainFrame.setVisible(true);
     }
     
