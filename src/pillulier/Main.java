@@ -6,19 +6,21 @@
 package pillulier;
 
 import Classes.Case;
-import Classes.GestionDetection;
+import fiducial.FiducialTracker;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
@@ -44,6 +46,7 @@ public class Main extends javax.swing.JFrame {
     private static int erreurs = 0;
     private static boolean aPrendre = false;
     private JFrame context = this;
+    private JPanel currentPanel = null;
     
     /**
      * Creates new form Main
@@ -65,35 +68,11 @@ public class Main extends javax.swing.JFrame {
         jPanelInfos.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         
         initLegende();
-        
-        
-                
-        cases.get(Codes.VENDREDIMATIN).setMedicamentPri(true);
                     
-        runTimerTaskUpdateCases();
+        runTimerTaskUpdateCases();    
         
-        Set<String> set = new HashSet<String>();
-        set.add("10");
-        set.add("20");
-        GestionDetection g = new GestionDetection();
-        g.setListCasesDisparues(set);
-        g.setListCasesDisparues(set);
-        g.setListCasesDisparues(set);
-        g.setListCasesDisparues(set);
-        g.setListCasesDisparues(set);
-        g.setListCasesDisparues(set);
-        g.setListCasesDisparues(set);
-        g.setListCasesDisparues(set);
-        g.setListCasesDisparues(set);
-        g.setListCasesDisparues(set);
-        g.setListCasesDisparues(set);
-        g.setListCasesDisparues(set);
-        g.setListCasesDisparues(set);
-        g.setListCasesDisparues(set);
-        
-        
-        
-        
+        FiducialTracker ft = new FiducialTracker();
+        ft.start();
     }
 
     /**
@@ -105,7 +84,7 @@ public class Main extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jDialog1 = new javax.swing.JDialog();
+        jDialog1 = new javax.swing.JDialog(this, true);
         jPanelDialog = new javax.swing.JPanel();
         jCheckBoxPriseMedicaments = new javax.swing.JCheckBox();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -140,6 +119,8 @@ public class Main extends javax.swing.JFrame {
         jLabel7 = new javax.swing.JLabel();
         jPanelMid = new javax.swing.JPanel();
 
+        jDialog1.setAlwaysOnTop(true);
+
         jPanelDialog.setBackground(new java.awt.Color(254, 254, 254));
 
         jCheckBoxPriseMedicaments.setText("Prise de médicaments");
@@ -166,7 +147,7 @@ public class Main extends javax.swing.JFrame {
                     .addGroup(jPanelDialogLayout.createSequentialGroup()
                         .addGap(24, 24, 24)
                         .addGroup(jPanelDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 364, Short.MAX_VALUE)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 452, Short.MAX_VALUE)
                             .addGroup(jPanelDialogLayout.createSequentialGroup()
                                 .addGroup(jPanelDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel12)
@@ -185,7 +166,7 @@ public class Main extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addComponent(jLabel12)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 240, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 246, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton1)
                 .addContainerGap())
@@ -199,9 +180,7 @@ public class Main extends javax.swing.JFrame {
         );
         jDialog1Layout.setVerticalGroup(
             jDialog1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jDialog1Layout.createSequentialGroup()
-                .addComponent(jPanelDialog, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+            .addComponent(jPanelDialog, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -526,6 +505,7 @@ public class Main extends javax.swing.JFrame {
     
     JPanel getJPanel(String code){
         JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.decode("#c8c8c8"));
         
         JLabel labelLed = new JLabel("•");
         labelLed.setForeground(Color.WHITE);
@@ -535,7 +515,7 @@ public class Main extends javax.swing.JFrame {
         panel.add(labelLed, BorderLayout.CENTER);
         panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         
-        panel.addMouseListener(getMouseListener(code));
+        panel.addMouseListener(getMouseListener(code, panel));
         return panel;
     }
 
@@ -656,18 +636,21 @@ public class Main extends javax.swing.JFrame {
         updateCases();
     }
     
-    private MouseListener getMouseListener(final String code){
+    private MouseListener getMouseListener(final String code, final JPanel panel){
         return new MouseListener() {
 
             @Override
             public void mouseClicked(MouseEvent me) {
+                
+                currentPanel = panel;
+                panel.setBackground(Color.BLACK);
                 Case caseM = cases.get(code);
                 jTextAreaDescription.setText(caseM.getDescription());
                 jCheckBoxPriseMedicaments.setSelected(caseM.getMedicamentAPrendre());
                 
                 jDialog1.setSize(400, 366);
-                jDialog1.setVisible(true);
-                
+                jDialog1.setLocationRelativeTo(context);
+                        
                 if(jButton1.getActionListeners().length > 0){
                     jButton1.removeActionListener(jButton1.getActionListeners()[0]);
                 }
@@ -677,15 +660,15 @@ public class Main extends javax.swing.JFrame {
                     public void actionPerformed(ActionEvent ae) {
                         Case caseM = cases.get(code);
                         caseM.setDescription(jTextAreaDescription.getText());
-                        caseM.setMedicamentAPrendre(jCheckBoxPriseMedicaments.isSelected());
-                        jDialog1.setLocationRelativeTo(context);
+                        caseM.setMedicamentAPrendre(jCheckBoxPriseMedicaments.isSelected());     
+                        panel.setBackground(Color.decode("#c8c8c8"));
                         jDialog1.setVisible(false);
-                        
                         updateCases();
                     }
                 });
                 
-                updateCases();
+                jDialog1.setVisible(true);
+
             }
 
             @Override
@@ -709,4 +692,5 @@ public class Main extends javax.swing.JFrame {
             }
         };
     }
+   
 }
